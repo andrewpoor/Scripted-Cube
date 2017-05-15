@@ -27,11 +27,8 @@ public class PlayerController : MonoBehaviour {
    public bool frontSensorDetected; //True if the sensor has detected something.
 
    private bool run; //If true, run the custom script.
-   private Vector3 startPosition;
-   private Quaternion startRotation;
    private string scriptRepresentation; //A visual representation of the script written so far.
    private int indentationLevel = 0; //Indentation level of the script representation.
-   private CarController carController; //Reference to the 'car' part of the robot.
 
    private Ray frontSensor; //Detects walls and other objects ahead of player.
    private int frontSensorDetectable; //Layer for things detectable with the front sensor.
@@ -45,6 +42,7 @@ public class PlayerController : MonoBehaviour {
    private string scriptHeader = @"
 using UnityEngine;
 using System.Collections;
+using System;
 
 public class ScriptedPlayerController : DynamicPlayerController
 {
@@ -53,10 +51,8 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public IEnumerator CustomScript(PlayerController parent) {
-      float duration = 1f;
-      float timer = 0f;
-      CarController carController = parent.GetCarController();
-
+   float timer = 0f;
+   Vector3 targetPosition;
    ";
 
    private string scriptBody = "";
@@ -86,17 +82,15 @@ public class ScriptedPlayerController : DynamicPlayerController
    void Start () {
       winLoseMessage.text = "";
       run = false;
-      startPosition = transform.localPosition;
-      startRotation = transform.localRotation;
       scriptRepresentation = "";
-      carController = GetComponentInChildren<CarController> ();
       frontSensorDetectable = LayerMask.GetMask ("FrontSensorDetectable");
+      frontSensorDetected = false;
    }
 
    // Update is called once per frame
    void Update () {
-      frontSensor.origin = transform.position - transform.forward;
-      frontSensor.direction = -transform.forward;
+      frontSensor.origin = transform.position + 0.5f * transform.forward.normalized;
+      frontSensor.direction = transform.forward;
       frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, frontSensorRange, frontSensorDetectable);
       Debug.DrawRay (frontSensor.origin, frontSensor.direction * frontSensorRange, Color.red);
 
@@ -109,18 +103,15 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    // FixedUpdate is called once per frame, before physics calculations
    void FixedUpdate() {
-      //Once only, start the user's script.
-      //The script will continue every frame until completion.
+      //If it's time to run the script, do so.
       if (run) {
+         Debug.Log ("Running");
+
          run = false; //Only run one instance of the script at a time.
 
          IEnumerator script = BeginScript ();
          StartCoroutine(script);
       }
-   }
-
-   public CarController GetCarController() {
-      return carController;
    }
 
    IEnumerator BeginScript()
@@ -144,57 +135,24 @@ public class ScriptedPlayerController : DynamicPlayerController
       }
    }
 
-   private void ResetPlayer()
-   {
-      transform.localPosition = startPosition;
-      transform.localRotation = startRotation;
-   }
-
    //The following functions are controlled by the UI elements to modify and run the custom script.
 
    public void AddForwardStep(float duration)
    {
       scriptBody += @"
-      duration = " + duration.ToString() + @"f;
-      ";
+      timer = 1.0f;
+      targetPosition = parent.transform.position + parent.transform.forward.normalized;
 
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = -300f;
-            axleInfo.rightWheel.motorTorque = -300f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+      while(timer > 0f) {
+         timer -= Time.deltaTime;
+         parent.transform.position += parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer);
+
+         yield return null;
       }
 
-      yield return new WaitForSeconds (duration);
+      parent.transform.position = targetPosition;
 
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 500f;
-            axleInfo.rightWheel.brakeTorque = 500f;
-            axleInfo.leftWheel.motorTorque = 0f;
-            axleInfo.rightWheel.motorTorque = 0f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      duration = 1f;
-
-      yield return new WaitForSeconds (3 * duration);
-
+      yield return null;
       ";
 
       scriptRepresentation += "\n";
@@ -207,46 +165,19 @@ public class ScriptedPlayerController : DynamicPlayerController
    public void AddBackwardStep(float duration)
    {
       scriptBody += @"
-      duration = " + duration.ToString() + @"f;
-      ";
-      
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = 300f;
-            axleInfo.rightWheel.motorTorque = 300f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
+      timer = 1.0f;
+      targetPosition = parent.transform.position - parent.transform.forward.normalized;
+
+      while(timer > 0f) {
+         timer -= Time.deltaTime;
+         parent.transform.position -= parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer);
+
+         yield return null;
       }
 
-      yield return new WaitForSeconds (duration);
+      parent.transform.position = targetPosition;
 
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 500f;
-            axleInfo.rightWheel.brakeTorque = 500f;
-            axleInfo.leftWheel.motorTorque = 0f;
-            axleInfo.rightWheel.motorTorque = 0f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      duration = 1f;
-
-      yield return new WaitForSeconds (3 * duration);
-
+      yield return null;
       ";
 
       scriptRepresentation += "\n";
@@ -258,49 +189,6 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    public void AddRightwardStep(float duration)
    {
-      scriptBody += @"
-      duration = " + duration.ToString() + @"f;
-      ";
-
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = -110f;
-            axleInfo.rightWheel.motorTorque = 110f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return new WaitForSeconds (duration);
-
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 500f;
-            axleInfo.rightWheel.brakeTorque = 500f;
-            axleInfo.leftWheel.motorTorque = 0f;
-            axleInfo.rightWheel.motorTorque = 0f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      duration = 1f;
-
-      yield return new WaitForSeconds (3 * duration);
-
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -310,49 +198,6 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    public void AddLeftwardStep(float duration)
    {
-      scriptBody += @"
-      duration = " + duration.ToString() + @"f;
-      ";
-
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = 110f;
-            axleInfo.rightWheel.motorTorque = -110f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return new WaitForSeconds (duration);
-
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 500f;
-            axleInfo.rightWheel.brakeTorque = 500f;
-            axleInfo.leftWheel.motorTorque = 0f;
-            axleInfo.rightWheel.motorTorque = 0f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      duration = 1f;
-
-      yield return new WaitForSeconds (3 * duration);
-
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -397,25 +242,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public void MoveForwards() {
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = -300f;
-            axleInfo.rightWheel.motorTorque = -300f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return null;
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -424,25 +250,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public void MoveBackwards() {
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = 300f;
-            axleInfo.rightWheel.motorTorque = 300f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return null;
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -451,25 +258,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public void TurnRight() {
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = -300f;
-            axleInfo.rightWheel.motorTorque = 300f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return null;
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -478,25 +266,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public void TurnLeft() {
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 0f;
-            axleInfo.rightWheel.brakeTorque = 0f;
-            axleInfo.leftWheel.motorTorque = 300f;
-            axleInfo.rightWheel.motorTorque = -300f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return null;
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -505,25 +274,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public void Brake() {
-      scriptBody += @"
-      foreach (AxleInfo axleInfo in carController.axleInfos) {
-         if (axleInfo.steering) {
-            axleInfo.leftWheel.steerAngle = 0f;
-            axleInfo.rightWheel.steerAngle = 0f;
-         }
-         if (axleInfo.motor) {
-            axleInfo.leftWheel.brakeTorque = 500000f;
-            axleInfo.rightWheel.brakeTorque = 500000f;
-            axleInfo.leftWheel.motorTorque = 0f;
-            axleInfo.rightWheel.motorTorque = 0f;
-         }
-         carController.ApplyLocalPositionToVisuals(axleInfo.leftWheel);
-         carController.ApplyLocalPositionToVisuals(axleInfo.rightWheel);
-      }
-
-      yield return new WaitForSeconds (3 * duration);
-      ";
-
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
@@ -541,18 +291,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    public void RunScript()
    {
       if(scriptBody != "") {
-         //      scriptPath = Application.dataPath + "/playerScript.txt";
-         //      var scriptFile = File.CreateText(scriptPath);
-         //      scriptFile.Write(script);
-         //      scriptFile.Close();
-
-         //      script = RuntimeCompiler.Load(scriptPath);
-         //
-         //      if (script == null)
-         //      {
-         //         throw new FileLoadException();
-         //      }
-
          string script = scriptHeader + scriptBody + scriptFooter;
 
          //Compile the script and extract its coroutine, which contains the actions for the player to perform.
