@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scripted Cube", "Assembly-CSharp.csproj", "{064D5157-23B9-927D-4CFE-43396AED835B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scripted Cube", "Assembly-UnityScript.unityproj", "{D5970FA7-413E-7A16-FAE1-694320ED202E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{064D5157-23B9-927D-4CFE-43396AED835B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{064D5157-23B9-927D-4CFE-43396AED835B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{064D5157-23B9-927D-4CFE-43396AED835B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{064D5157-23B9-927D-4CFE-43396AED835B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5970FA7-413E-7A16-FAE1-694320ED202E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5970FA7-413E-7A16-FAE1-694320ED202E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5970FA7-413E-7A16-FAE1-694320ED202E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5970FA7-413E-7A16-FAE1-694320ED202E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal

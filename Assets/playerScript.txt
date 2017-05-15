@@ -1,0 +1,42 @@
+
+using UnityEngine;
+using System.Collections;
+
+public class ScriptedPlayerController : DynamicPlayerController
+{
+   public IEnumerator GetCoroutine(PlayerController parent) {
+      return CustomScript(parent);
+   }
+
+   public IEnumerator CustomScript(PlayerController parent) {
+      Vector3 force = new Vector3 (0, 0, -550);
+      var rb = parent.GetRigidBody();
+
+   
+      while(rb.velocity.magnitude > 0.0f) {
+         yield return null;
+      }      
+      rb.AddForce (force);      
+      while(rb.velocity.magnitude <= 0.0f) {
+         yield return null;
+      }
+
+      while(rb.velocity.magnitude > 0.0f) {
+         yield return null;
+      }      
+      rb.AddForce (force);      
+      while(rb.velocity.magnitude <= 0.0f) {
+         yield return null;
+      }
+      
+      while(rb.velocity.magnitude > 0.0f) {
+         yield return null;
+      }      
+      force = new Vector3 (-550, 0, 0);
+      rb.AddForce (force);      
+      while(rb.velocity.magnitude <= 0.0f) {
+         yield return null;
+      }
+   }
+}
+   
