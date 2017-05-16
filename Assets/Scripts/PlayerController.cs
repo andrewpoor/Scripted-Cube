@@ -22,16 +22,21 @@ public class PlayerController : MonoBehaviour {
    public LeftEvent leftEvent;
    public WhileEvent whileEvent;
 
-   public float frontSensorRange = 100f;
-   public RaycastHit frontSensorHit; //Details sensor detects.
-   public bool frontSensorDetected; //True if the sensor has detected something.
+   public float wallSensorRange = 100f;
+   public RaycastHit frontSensorHit; //Details front sensor detects.
+   public bool frontSensorDetected; //True if the front sensor has detected something.
+   public RaycastHit rearSensorHit; //Details rear sensor detects.
+   public bool rearSensorDetected; //True if the rear sensor has detected something.
+   public float tileTime = 1.0f; //Time taken for the player to move one tile.
+   public float spinTime = 1.0f; //Time taken for the player to rotate 90 degrees.
 
    private bool run; //If true, run the custom script.
    private string scriptRepresentation; //A visual representation of the script written so far.
    private int indentationLevel = 0; //Indentation level of the script representation.
 
-   private Ray frontSensor; //Detects walls and other objects ahead of player.
-   private int frontSensorDetectable; //Layer for things detectable with the front sensor.
+   private Ray frontSensor = new Ray(); //Detects walls and other objects ahead of player.
+   private Ray rearSensor = new Ray(); //Detects walls and other objects behind the player.
+   private int horizontalSensorDetectable; //Layer for things detectable with the front sensor.
 
    //For dynamically loading the user's script.
    private System.Reflection.Assembly movementAssembly;
@@ -39,28 +44,9 @@ public class PlayerController : MonoBehaviour {
    private IEnumerator scriptCoroutine;
 
    //Boilerplate code for assembling the user's script.
-   private string scriptHeader = @"
-using UnityEngine;
-using System.Collections;
-using System;
-
-public class ScriptedPlayerController : DynamicPlayerController
-{
-   public IEnumerator GetCoroutine(PlayerController parent) {
-      return CustomScript(parent);
-   }
-
-   public IEnumerator CustomScript(PlayerController parent) {
-   float timer = 0f;
-   Vector3 targetPosition;
-   ";
-
-   private string scriptBody = "";
-
-   private string scriptFooter = @"
-   }
-}
-   ";
+   private string scriptHeader;
+   private string scriptBody;
+   private string scriptFooter;
 
    void OnEnable() {
       forwardEvent.command +=  AddForwardStep;
@@ -80,25 +66,59 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    // Use this for initialization
    void Start () {
+      scriptHeader = @"
+using UnityEngine;
+using System.Collections;
+using System;
+
+public class ScriptedPlayerController : DynamicPlayerController
+{
+   public IEnumerator GetCoroutine(PlayerController parent) {
+      return CustomScript(parent);
+   }
+
+   public IEnumerator CustomScript(PlayerController parent) {
+   float timer = 0f;
+   int distance = 0;
+   int rotations = 0;
+   float tileTime = " + tileTime + @"f;
+   float spinTime = " + spinTime + @"f;
+   Vector3 targetPosition;
+   Quaternion startRotation;
+   Quaternion targetRotation;
+   ";
+
+      scriptBody = "";
+
+      scriptFooter = @"
+   }
+}
+   ";
+
       winLoseMessage.text = "";
       run = false;
       scriptRepresentation = "";
-      frontSensorDetectable = LayerMask.GetMask ("FrontSensorDetectable");
+      horizontalSensorDetectable = LayerMask.GetMask ("HorizontalSensorDetectable");
       frontSensorDetected = false;
+      rearSensorDetected = false;
    }
 
    // Update is called once per frame
    void Update () {
       frontSensor.origin = transform.position + 0.5f * transform.forward.normalized;
       frontSensor.direction = transform.forward;
-      frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, frontSensorRange, frontSensorDetectable);
-      Debug.DrawRay (frontSensor.origin, frontSensor.direction * frontSensorRange, Color.red);
+      frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, wallSensorRange, horizontalSensorDetectable);
+      Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
 
       if (frontSensorDetected) {
          scriptPreview.text = "Hit: " + frontSensorHit.distance + "m. Script: " + scriptRepresentation;
       } else {
          scriptPreview.text = "Nope. Script: " + scriptRepresentation;
       }
+
+      rearSensor.origin = transform.position;
+      rearSensor.direction = -transform.forward;
+      rearSensorDetected = Physics.Raycast (rearSensor, out rearSensorHit, wallSensorRange, horizontalSensorDetectable);
    }
 
    // FixedUpdate is called once per frame, before physics calculations
@@ -137,15 +157,19 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    //The following functions are controlled by the UI elements to modify and run the custom script.
 
-   public void AddForwardStep(float duration)
+   public void AddForwardStep(int duration)
    {
       scriptBody += @"
-      timer = 1.0f;
-      targetPosition = parent.transform.position + parent.transform.forward.normalized;
+      distance = Math.Min (" + duration + @", (int) parent.frontSensorHit.distance);
+      ";
+
+      scriptBody += @"
+      timer = tileTime * distance;
+      targetPosition = parent.transform.position + parent.transform.forward.normalized * distance;
 
       while(timer > 0f) {
          timer -= Time.deltaTime;
-         parent.transform.position += parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer);
+         parent.transform.position += parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer) / tileTime;
 
          yield return null;
       }
@@ -159,18 +183,22 @@ public class ScriptedPlayerController : DynamicPlayerController
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
       }
-      scriptRepresentation += "Move forwards for " + duration.ToString() + " seconds.";
+      scriptRepresentation += "Move " + duration.ToString() + " squares forwards.";
    }
 
-   public void AddBackwardStep(float duration)
+   public void AddBackwardStep(int duration)
    {
       scriptBody += @"
-      timer = 1.0f;
-      targetPosition = parent.transform.position - parent.transform.forward.normalized;
+      distance = Math.Min (" + duration + @", (int) parent.rearSensorHit.distance);
+      ";
+
+      scriptBody += @"
+      timer = tileTime * distance;
+      targetPosition = parent.transform.position - parent.transform.forward.normalized * distance;
 
       while(timer > 0f) {
          timer -= Time.deltaTime;
-         parent.transform.position -= parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer);
+         parent.transform.position -= parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer) / tileTime;
 
          yield return null;
       }
@@ -184,28 +212,68 @@ public class ScriptedPlayerController : DynamicPlayerController
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
       }
-      scriptRepresentation += "Move backwards for " + duration.ToString() + " seconds.";
+      scriptRepresentation += "Move " + duration.ToString() + " squares backwards.";
    }
 
-   public void AddRightwardStep(float duration)
+   public void AddRightwardStep(int duration)
    {
+      scriptBody += @"
+      rotations = " + duration + @";
+      ";
+
+      scriptBody += @"
+      timer = spinTime * rotations;
+      startRotation = parent.transform.rotation;
+      targetRotation = Quaternion.LookRotation(new Vector3 ((startRotation.eulerAngles.x + rotations * 90) % 360, startRotation.eulerAngles.y, startRotation.eulerAngles.z), Vector3.up);
+      
+      while(timer > 0f) {
+         timer -= Time.deltaTime;
+         parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
+         yield return null;
+      }
+
+      parent.transform.rotation = targetRotation;
+
+      yield return null;
+      ";
+
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
       }
-      scriptRepresentation += "Turn right for " + duration.ToString() + " seconds.";
+      scriptRepresentation += "Turn right " + (duration * 90).ToString() + " degrees.";
    }
 
    public void AddLeftwardStep(float duration)
    {
+      scriptBody += @"
+      rotations = " + duration + @";
+      ";
+
+      scriptBody += @"
+      timer = spinTime * rotations;
+      startRotation = parent.transform.rotation;
+      targetRotation = Quaternion.LookRotation(new Vector3 ((startRotation.eulerAngles.x - rotations * 90) % 360, startRotation.eulerAngles.y, startRotation.eulerAngles.z), Vector3.up);
+      
+      while(timer > 0f) {
+         timer -= Time.deltaTime;
+         parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
+         yield return null;
+      }
+
+      parent.transform.rotation = targetRotation;
+
+      yield return null;
+      ";
+
       scriptRepresentation += "\n";
       for(int i = 0; i < indentationLevel; i++) {
          scriptRepresentation += "   ";
       }
-      scriptRepresentation += "Turn left for " + duration.ToString() + " seconds.";
+      scriptRepresentation += "Turn left " + (duration * 90).ToString() + " degrees.";
    }
 
-   public void StartWhile(string sensorType, string op, float value) {
+   public void StartWhile(string sensorType, string op, int value) {
       if(sensorType == "Front Sensor Distance") {
          scriptBody += @"
          while(parent.frontSensorHit.distance " + op + " " + value + @") {
@@ -239,46 +307,6 @@ public class ScriptedPlayerController : DynamicPlayerController
          scriptRepresentation += "   ";
       }
       scriptRepresentation += "}";
-   }
-
-   public void MoveForwards() {
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Move forwards.";
-   }
-
-   public void MoveBackwards() {
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Move backwards.";
-   }
-
-   public void TurnRight() {
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Turn right.";
-   }
-
-   public void TurnLeft() {
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Turn Left.";
-   }
-
-   public void Brake() {
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Brake.";
    }
     
    //Reset all of the game's components

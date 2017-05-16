@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class ForwardEvent : MonoBehaviour {
 
-   public delegate void AddForwardsCommand(float duration);
+   public delegate void AddForwardsCommand(int duration);
    public AddForwardsCommand command;
 
    public void AddCommand() {
-      float duration;
-      if (command != null && float.TryParse(GetComponent<InputField>().text, out duration)) {
+      int duration;
+      if (command != null && int.TryParse(GetComponent<InputField>().text, out duration)) {
          command (duration);
       }
    }

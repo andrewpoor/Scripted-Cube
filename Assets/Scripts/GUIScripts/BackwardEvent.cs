@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class BackwardEvent : MonoBehaviour {
 
-   public delegate void AddBackwardsCommand(float duration);
+   public delegate void AddBackwardsCommand(int duration);
    public AddBackwardsCommand command;
 
    public void AddCommand() {
-      float duration;
-      if (command != null && float.TryParse(GetComponent<InputField>().text, out duration)) {
+      int duration;
+      if (command != null && int.TryParse(GetComponent<InputField>().text, out duration)) {
          command (duration);
       }
    }

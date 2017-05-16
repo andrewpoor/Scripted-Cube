@@ -54,7 +54,6 @@
      <Compile Include="Assets\CSharpCompiler\UnityErrorTextWriter.cs" />
      <Compile Include="Assets\CSharpCompiler\UnityLogTextWriter.cs" />
      <Compile Include="Assets\Scripts\CameraController.cs" />
-     <Compile Include="Assets\Scripts\CarController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\BackwardEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\ForwardEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\LeftEvent.cs" />

@@ -5,12 +5,12 @@ using UnityEngine.UI;
 
 public class RightEvent : MonoBehaviour {
 
-   public delegate void AddRightCommand(float duration);
+   public delegate void AddRightCommand(int duration);
    public AddRightCommand command;
 
    public void AddCommand() {
-      float duration;
-      if (command != null && float.TryParse(GetComponent<InputField>().text, out duration)) {
+      int duration;
+      if (command != null && int.TryParse(GetComponent<InputField>().text, out duration)) {
          command (duration);
       }
    }
