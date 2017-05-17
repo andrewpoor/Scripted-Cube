@@ -56,7 +56,9 @@
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\BackwardEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\ForwardEvent.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\IfEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\LeftEvent.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\LoopEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\RightEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\WhileEvent.cs" />
      <Compile Include="Assets\Scripts\GroundTextureTiling.cs" />

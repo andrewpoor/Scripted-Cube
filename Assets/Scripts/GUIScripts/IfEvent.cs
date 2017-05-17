@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WhileEvent : MonoBehaviour {
+public class IfEvent : MonoBehaviour {
 
-   public delegate void AddWhileCommand(string sensorType, string comparator, string value);
-   public AddWhileCommand command;
+   public delegate void AddIfCommand(string sensorType, string comparator, string value);
+   public AddIfCommand command;
 
    public Dropdown sensorType;
    public Dropdown comparator;

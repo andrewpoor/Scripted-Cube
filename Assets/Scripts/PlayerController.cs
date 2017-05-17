@@ -21,22 +21,30 @@ public class PlayerController : MonoBehaviour {
    public RightEvent rightEvent;
    public LeftEvent leftEvent;
    public WhileEvent whileEvent;
+   public IfEvent ifEvent;
+   public LoopEvent loopEvent;
 
    public float wallSensorRange = 100f;
+   public float groundSensorRange = 1f;
    public RaycastHit frontSensorHit; //Details front sensor detects.
    public bool frontSensorDetected; //True if the front sensor has detected something.
    public RaycastHit rearSensorHit; //Details rear sensor detects.
    public bool rearSensorDetected; //True if the rear sensor has detected something.
+   public RaycastHit groundSensorHit; //Details ground sensor detects.
+   public bool groundSensorDetected; //True if the ground sensor has detected something.
    public float tileTime = 1.0f; //Time taken for the player to move one tile.
    public float spinTime = 1.0f; //Time taken for the player to rotate 90 degrees.
 
    private bool run; //If true, run the custom script.
    private string scriptRepresentation; //A visual representation of the script written so far.
    private int indentationLevel = 0; //Indentation level of the script representation.
+   private string loopIndexName = ""; //Allows for new loop indexes to be created in the dynamic code by extending the previous one.
 
    private Ray frontSensor = new Ray(); //Detects walls and other objects ahead of player.
    private Ray rearSensor = new Ray(); //Detects walls and other objects behind the player.
+   private Ray groundSensor = new Ray(); //Detects details about the ground below the player.
    private int horizontalSensorDetectable; //Layer for things detectable with the front sensor.
+   private int groundSensorDetectable; //Layer for things detectable with the front sensor.
 
    //For dynamically loading the user's script.
    private System.Reflection.Assembly movementAssembly;
@@ -54,6 +62,8 @@ public class PlayerController : MonoBehaviour {
       rightEvent.command +=    AddRightwardStep;
       leftEvent.command +=     AddLeftwardStep;
       whileEvent.command +=    StartWhile;
+      ifEvent.command +=       StartIf;
+      loopEvent.command +=     StartLoop;
    }
 
    void OnDisable() {
@@ -62,6 +72,8 @@ public class PlayerController : MonoBehaviour {
       rightEvent.command -=    AddRightwardStep;
       leftEvent.command -=     AddLeftwardStep;
       whileEvent.command -=    StartWhile;
+      ifEvent.command -=       StartIf;
+      loopEvent.command -=     StartLoop;
    }
 
    // Use this for initialization
@@ -91,6 +103,7 @@ public class ScriptedPlayerController : DynamicPlayerController
       scriptBody = "";
 
       scriptFooter = @"
+   yield return null;
    }
 }
    ";
@@ -99,8 +112,10 @@ public class ScriptedPlayerController : DynamicPlayerController
       run = false;
       scriptRepresentation = "";
       horizontalSensorDetectable = LayerMask.GetMask ("HorizontalSensorDetectable");
+      groundSensorDetectable = LayerMask.GetMask ("GroundSensorDetectable");
       frontSensorDetected = false;
       rearSensorDetected = false;
+      groundSensorDetected = false;
    }
 
    // Update is called once per frame
@@ -111,14 +126,18 @@ public class ScriptedPlayerController : DynamicPlayerController
       Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
 
       if (frontSensorDetected) {
-         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m. Script: " + scriptRepresentation;
+         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
       } else {
-         scriptPreview.text = "Nope. Script: " + scriptRepresentation;
+         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
       }
 
       rearSensor.origin = transform.position;
       rearSensor.direction = -transform.forward;
       rearSensorDetected = Physics.Raycast (rearSensor, out rearSensorHit, wallSensorRange, horizontalSensorDetectable);
+
+      groundSensor.origin = transform.position;
+      groundSensor.direction = Vector3.down;
+      groundSensorDetected = Physics.Raycast (groundSensor, out groundSensorHit, groundSensorRange, groundSensorDetectable);
    }
 
    // FixedUpdate is called once per frame, before physics calculations
@@ -146,10 +165,10 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    void OnTriggerEnter( Collider other )
    {
-      if( other.gameObject.CompareTag("Succeed") )
+      if( other.gameObject.CompareTag("ColourGreen") )
       {
          winLoseMessage.text = "You win!";
-      } else if (other.gameObject.CompareTag("Fail") )
+      } else if (other.gameObject.CompareTag("ColourRed") )
       {
          winLoseMessage.text = "Game over";
       }
@@ -273,31 +292,51 @@ public class ScriptedPlayerController : DynamicPlayerController
       scriptRepresentation += "Turn left " + (duration * 90).ToString() + " degrees.";
    }
 
-   public void StartWhile(string sensorType, string op, int value) {
+   public void StartWhile(string sensorType, string op, string value) {
+      string negation = "!";
+      if (op == "=") {
+         op = "==";
+         negation = "";
+      }
+
       if(sensorType == "Front Sensor Distance") {
          scriptBody += @"
          while(parent.frontSensorHit.distance " + op + " " + value + @") {
          ";
-
-         scriptRepresentation += "\n";
-         for(int i = 0; i < indentationLevel; i++) {
-            scriptRepresentation += "   ";
-         }
-         scriptRepresentation += "While(FrontSensorDistance " + op + " " + value + ") {";
-
-         indentationLevel += 1;
       } else if(sensorType == "Front Sensor Colour") {
-         scriptRepresentation += "\nSensor type not yet supported.";
+         scriptBody += @"
+         while(" + negation + @"parent.frontSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+         ";
       } else if(sensorType == "Ground Sensor Colour") {
-         scriptRepresentation += "\nSensor type not yet supported.";
+         scriptBody += @"
+         while(" + negation + @"parent.groundSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+         ";
       } else {
-         scriptRepresentation += "\nUnknown sensor type used.";
+         indentationLevel -= 1;
+      }
+
+      scriptRepresentation += "\n";
+      for(int i = 0; i < indentationLevel; i++) {
+         scriptRepresentation += "   ";
+      }
+      indentationLevel += 1;
+
+      if(sensorType == "Front Sensor Distance") {
+         scriptRepresentation += "While(FrontSensorDistance " + op + " " + value + ") {";
+      } else if(sensorType == "Front Sensor Colour") {
+         scriptRepresentation += "While(FrontColour is " + (op == "!=" ? "not " : "") + value + ") {";
+      } else if(sensorType == "Ground Sensor Colour") {
+         scriptRepresentation += "While(GroundColour is " + (op == "!=" ? "not " : "") + value + ") {";
+      } else {
+         scriptRepresentation += "Unknown sensor type used.";
       }
    }
 
-   public void EndWhile() {
+   public void EndBlock() {
       scriptBody += @"
       }
+
+      yield return null;
       ";
 
       indentationLevel = Math.Max(0, indentationLevel - 1);
@@ -307,6 +346,74 @@ public class ScriptedPlayerController : DynamicPlayerController
          scriptRepresentation += "   ";
       }
       scriptRepresentation += "}";
+   }
+
+   public void StartIf(string sensorType, string op, string value) {
+      string negation = "!";
+      if (op == "=") {
+         op = "==";
+         negation = "";
+      }
+
+      if(sensorType == "Front Sensor Distance") {
+         scriptBody += @"
+         if(parent.frontSensorHit.distance " + op + " " + value + @") {
+         ";
+      } else if(sensorType == "Front Sensor Colour") {
+         scriptBody += @"
+         if(" + negation + @"parent.frontSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+         ";
+      } else if(sensorType == "Ground Sensor Colour") {
+         scriptBody += @"
+         if(" + negation + @"parent.groundSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+         ";
+      } else {
+         indentationLevel -= 1;
+      }
+
+      scriptRepresentation += "\n";
+      for(int i = 0; i < indentationLevel; i++) {
+         scriptRepresentation += "   ";
+      }
+      indentationLevel += 1;
+
+      if(sensorType == "Front Sensor Distance") {
+         scriptRepresentation += "If(FrontSensorDistance " + op + " " + value + ") {";
+      } else if(sensorType == "Front Sensor Colour") {
+         scriptRepresentation += "If(FrontColour is " + (op == "!=" ? "not " : "") + value + ") {";
+      } else if(sensorType == "Ground Sensor Colour") {
+         scriptRepresentation += "If(GroundColour is " + (op == "!=" ? "not " : "") + value + ") {";
+      } else {
+         scriptRepresentation += "Unknown sensor type used.";
+      }
+   }
+
+   public void StartElse() {
+      scriptBody += @"
+      } else {
+      ";
+
+      scriptRepresentation += "\n";
+      for(int i = 0; i < indentationLevel - 1; i++) {
+         scriptRepresentation += "   ";
+      }
+      scriptRepresentation += "} else {";
+   }
+
+   public void StartLoop(int numLoops) {
+      loopIndexName += "i";
+
+      scriptBody += @"
+      for(int " + loopIndexName + @" = 0; " + loopIndexName + @" < " + numLoops + @"; " + loopIndexName + @"++) {
+      ";
+
+      scriptRepresentation += "\n";
+      for(int i = 0; i < indentationLevel; i++) {
+         scriptRepresentation += "   ";
+      }
+      scriptRepresentation += "Loop " + numLoops + " times {";
+
+      indentationLevel += 1;
    }
     
    //Reset all of the game's components

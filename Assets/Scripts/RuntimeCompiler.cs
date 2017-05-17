@@ -50,6 +50,8 @@ public class RuntimeCompiler : MonoBehaviour
       //Check for errors
       if (result.Errors.Count > 0)
       {
+         Debug.Log (source);
+
          var msg = new StringBuilder();
          foreach (CompilerError error in result.Errors)
          {
