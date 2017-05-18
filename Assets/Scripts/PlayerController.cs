@@ -179,7 +179,7 @@ public class ScriptedPlayerController : DynamicPlayerController
    public void AddForwardStep(int duration)
    {
       scriptBody += @"
-      distance = Math.Min (" + duration + @", (int) parent.frontSensorHit.distance);
+      distance = Math.Min (" + duration + @", (int) Mathf.Round(parent.frontSensorHit.distance));
       ";
 
       scriptBody += @"
@@ -208,7 +208,7 @@ public class ScriptedPlayerController : DynamicPlayerController
    public void AddBackwardStep(int duration)
    {
       scriptBody += @"
-      distance = Math.Min (" + duration + @", (int) parent.rearSensorHit.distance);
+      distance = Math.Min (" + duration + @", (int) Mathf.Round(parent.rearSensorHit.distance));
       ";
 
       scriptBody += @"
@@ -243,7 +243,7 @@ public class ScriptedPlayerController : DynamicPlayerController
       scriptBody += @"
       timer = spinTime * rotations;
       startRotation = parent.transform.rotation;
-      targetRotation = Quaternion.LookRotation(new Vector3 ((startRotation.eulerAngles.x + rotations * 90) % 360, startRotation.eulerAngles.y, startRotation.eulerAngles.z), Vector3.up);
+      targetRotation = startRotation * Quaternion.Euler(Vector3.up * 90 * rotations);
       
       while(timer > 0f) {
          timer -= Time.deltaTime;
@@ -272,7 +272,7 @@ public class ScriptedPlayerController : DynamicPlayerController
       scriptBody += @"
       timer = spinTime * rotations;
       startRotation = parent.transform.rotation;
-      targetRotation = Quaternion.LookRotation(new Vector3 ((startRotation.eulerAngles.x - rotations * 90) % 360, startRotation.eulerAngles.y, startRotation.eulerAngles.z), Vector3.up);
+      targetRotation = startRotation * Quaternion.Euler(Vector3.up * -90 * rotations);
       
       while(timer > 0f) {
          timer -= Time.deltaTime;
@@ -301,7 +301,7 @@ public class ScriptedPlayerController : DynamicPlayerController
 
       if(sensorType == "Front Sensor Distance") {
          scriptBody += @"
-         while(parent.frontSensorHit.distance " + op + " " + value + @") {
+         while(Mathf.Round(parent.frontSensorHit.distance) " + op + " " + value + @") {
          ";
       } else if(sensorType == "Front Sensor Colour") {
          scriptBody += @"
@@ -357,7 +357,7 @@ public class ScriptedPlayerController : DynamicPlayerController
 
       if(sensorType == "Front Sensor Distance") {
          scriptBody += @"
-         if(parent.frontSensorHit.distance " + op + " " + value + @") {
+         if(Mathf.Round(parent.frontSensorHit.distance) " + op + " " + value + @") {
          ";
       } else if(sensorType == "Front Sensor Colour") {
          scriptBody += @"
