@@ -95,6 +95,7 @@ public class ScriptedPlayerController : DynamicPlayerController
    int rotations = 0;
    float tileTime = " + tileTime + @"f;
    float spinTime = " + spinTime + @"f;
+   Vector3 startPosition;
    Vector3 targetPosition;
    Quaternion startRotation;
    Quaternion targetRotation;
@@ -123,13 +124,13 @@ public class ScriptedPlayerController : DynamicPlayerController
       frontSensor.origin = transform.position + 0.5f * transform.forward.normalized;
       frontSensor.direction = transform.forward;
       frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, wallSensorRange, horizontalSensorDetectable);
-      Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
 
-      if (frontSensorDetected) {
-         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
-      } else {
-         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
-      }
+      //Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
+      //if (frontSensorDetected) {
+      //   scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
+      //} else {
+      //   scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
+      //}
 
       rearSensor.origin = transform.position;
       rearSensor.direction = -transform.forward;
@@ -138,6 +139,8 @@ public class ScriptedPlayerController : DynamicPlayerController
       groundSensor.origin = transform.position;
       groundSensor.direction = Vector3.down;
       groundSensorDetected = Physics.Raycast (groundSensor, out groundSensorHit, groundSensorRange, groundSensorDetectable);
+
+      scriptPreview.text = "Script: " + scriptRepresentation;
    }
 
    // FixedUpdate is called once per frame, before physics calculations
@@ -184,18 +187,14 @@ public class ScriptedPlayerController : DynamicPlayerController
 
       scriptBody += @"
       timer = tileTime * distance;
-      targetPosition = parent.transform.position + parent.transform.forward.normalized * distance;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition + parent.transform.forward.normalized * distance;
 
       while(timer > 0f) {
          timer -= Time.deltaTime;
-         parent.transform.position += parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer) / tileTime;
-
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition, (tileTime * distance - Math.Max(timer, 0)) / (tileTime * distance));
          yield return null;
       }
-
-      parent.transform.position = targetPosition;
-
-      yield return null;
       ";
 
       scriptRepresentation += "\n";
@@ -213,18 +212,14 @@ public class ScriptedPlayerController : DynamicPlayerController
 
       scriptBody += @"
       timer = tileTime * distance;
-      targetPosition = parent.transform.position - parent.transform.forward.normalized * distance;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition - parent.transform.forward.normalized * distance;
 
       while(timer > 0f) {
          timer -= Time.deltaTime;
-         parent.transform.position -= parent.transform.forward.normalized * Math.Min(Time.deltaTime, timer) / tileTime;
-
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition, (tileTime * distance - Math.Max(timer, 0)) / (tileTime * distance));
          yield return null;
       }
-
-      parent.transform.position = targetPosition;
-
-      yield return null;
       ";
 
       scriptRepresentation += "\n";
@@ -250,10 +245,6 @@ public class ScriptedPlayerController : DynamicPlayerController
          parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
          yield return null;
       }
-
-      parent.transform.rotation = targetRotation;
-
-      yield return null;
       ";
 
       scriptRepresentation += "\n";
@@ -279,10 +270,6 @@ public class ScriptedPlayerController : DynamicPlayerController
          parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
          yield return null;
       }
-
-      parent.transform.rotation = targetRotation;
-
-      yield return null;
       ";
 
       scriptRepresentation += "\n";
@@ -335,8 +322,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    public void EndBlock() {
       scriptBody += @"
       }
-
-      yield return null;
       ";
 
       indentationLevel = Math.Max(0, indentationLevel - 1);
