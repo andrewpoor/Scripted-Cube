@@ -99,6 +99,7 @@ public class ScriptedPlayerController : DynamicPlayerController
    Vector3 targetPosition;
    Quaternion startRotation;
    Quaternion targetRotation;
+   bool yielded;
    ";
 
       scriptBody = "";
@@ -121,16 +122,16 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    // Update is called once per frame
    void Update () {
-      frontSensor.origin = transform.position + 0.5f * transform.forward.normalized;
+      frontSensor.origin = transform.position + 0.3f * transform.forward.normalized;
       frontSensor.direction = transform.forward;
       frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, wallSensorRange, horizontalSensorDetectable);
 
-      //Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
-      //if (frontSensorDetected) {
-      //   scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
-      //} else {
-      //   scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
-      //}
+      Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
+      if (frontSensorDetected) {
+         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
+      } else {
+         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
+      }
 
       rearSensor.origin = transform.position;
       rearSensor.direction = -transform.forward;
@@ -140,7 +141,7 @@ public class ScriptedPlayerController : DynamicPlayerController
       groundSensor.direction = Vector3.down;
       groundSensorDetected = Physics.Raycast (groundSensor, out groundSensorHit, groundSensorRange, groundSensorDetectable);
 
-      scriptPreview.text = "Script: " + scriptRepresentation;
+      //scriptPreview.text = "Script: " + scriptRepresentation;
    }
 
    // FixedUpdate is called once per frame, before physics calculations
@@ -193,6 +194,8 @@ public class ScriptedPlayerController : DynamicPlayerController
       while(timer > 0f) {
          timer -= Time.deltaTime;
          parent.transform.position = Vector3.Lerp(startPosition, targetPosition, (tileTime * distance - Math.Max(timer, 0)) / (tileTime * distance));
+         
+         yielded = true;
          yield return null;
       }
       ";
@@ -218,6 +221,8 @@ public class ScriptedPlayerController : DynamicPlayerController
       while(timer > 0f) {
          timer -= Time.deltaTime;
          parent.transform.position = Vector3.Lerp(startPosition, targetPosition, (tileTime * distance - Math.Max(timer, 0)) / (tileTime * distance));
+         
+         yielded = true;
          yield return null;
       }
       ";
@@ -243,6 +248,8 @@ public class ScriptedPlayerController : DynamicPlayerController
       while(timer > 0f) {
          timer -= Time.deltaTime;
          parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
+         
+         yielded = true;
          yield return null;
       }
       ";
@@ -268,6 +275,8 @@ public class ScriptedPlayerController : DynamicPlayerController
       while(timer > 0f) {
          timer -= Time.deltaTime;
          parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
+         
+         yielded = true;
          yield return null;
       }
       ";
@@ -289,14 +298,17 @@ public class ScriptedPlayerController : DynamicPlayerController
       if(sensorType == "Front Sensor Distance") {
          scriptBody += @"
          while(Mathf.Round(parent.frontSensorHit.distance) " + op + " " + value + @") {
+            yielded = false;
          ";
       } else if(sensorType == "Front Sensor Colour") {
          scriptBody += @"
          while(" + negation + @"parent.frontSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+            yielded = false;
          ";
       } else if(sensorType == "Ground Sensor Colour") {
          scriptBody += @"
          while(" + negation + @"parent.groundSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+            yielded = false;
          ";
       } else {
          indentationLevel -= 1;
@@ -321,6 +333,9 @@ public class ScriptedPlayerController : DynamicPlayerController
 
    public void EndBlock() {
       scriptBody += @"
+         if(!yielded) {
+            yield return null;
+         }
       }
       ";
 
@@ -343,14 +358,17 @@ public class ScriptedPlayerController : DynamicPlayerController
       if(sensorType == "Front Sensor Distance") {
          scriptBody += @"
          if(Mathf.Round(parent.frontSensorHit.distance) " + op + " " + value + @") {
+            yielded = false;
          ";
       } else if(sensorType == "Front Sensor Colour") {
          scriptBody += @"
          if(" + negation + @"parent.frontSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+            yielded = false;
          ";
       } else if(sensorType == "Ground Sensor Colour") {
          scriptBody += @"
          if(" + negation + @"parent.groundSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
+            yielded = false;
          ";
       } else {
          indentationLevel -= 1;
@@ -376,6 +394,7 @@ public class ScriptedPlayerController : DynamicPlayerController
    public void StartElse() {
       scriptBody += @"
       } else {
+         yielded = false;
       ";
 
       scriptRepresentation += "\n";
@@ -390,6 +409,7 @@ public class ScriptedPlayerController : DynamicPlayerController
 
       scriptBody += @"
       for(int " + loopIndexName + @" = 0; " + loopIndexName + @" < " + numLoops + @"; " + loopIndexName + @"++) {
+         yielded = false;
       ";
 
       scriptRepresentation += "\n";
