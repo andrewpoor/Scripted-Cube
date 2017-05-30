@@ -7,7 +7,7 @@ public class LevelLoader : MonoBehaviour {
 
    public void LoadLevel(int level)
    {
-      string sceneName = "Level" + level;
+      string sceneName = "Level" + (level + 1);
       if (level == 0) {
          sceneName = "DemoLevel";
       }

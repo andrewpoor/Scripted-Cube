@@ -67,6 +67,7 @@
      <Compile Include="Assets\Scripts\GroundTextureTiling.cs" />
      <Compile Include="Assets\Scripts\KeyController.cs" />
      <Compile Include="Assets\Scripts\KeyRotator.cs" />
+     <Compile Include="Assets\Scripts\LevelScreenSizeController.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
      <Compile Include="Assets\Scripts\RuntimeCompiler.cs" />
      <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-Basic.shader" />
