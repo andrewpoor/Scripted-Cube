@@ -1,14 +1,15 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\LevelScreenSizeController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GUIScripts\HeadController.cs">
     <Files>
       <File FileName="Assets\Scripts\PlayerController.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\CameraController.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\KeyRotator.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\KeyController.cs" Line="22" Column="48" />
-      <File FileName="Assets\Scripts\DoorController.cs" Line="9" Column="74" />
-      <File FileName="Assets\Scripts\LevelScreenSizeController.cs" Line="8" Column="30" />
-      <File FileName="Assets\Scripts\GUIScripts\LevelLoader.cs" Line="16" Column="2" />
+      <File FileName="Assets\Scripts\KeyController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\DoorController.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GUIScripts\LevelLoader.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GUIScripts\DragController.cs" Line="52" Column="51" />
+      <File FileName="Assets\Scripts\GUIScripts\HeadController.cs" Line="44" Column="60" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

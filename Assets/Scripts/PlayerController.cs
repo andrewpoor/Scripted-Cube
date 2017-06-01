@@ -56,25 +56,25 @@ public class PlayerController : MonoBehaviour {
    private string scriptBody;
    private string scriptFooter;
 
-   void OnEnable() {
-      forwardEvent.command +=  AddForwardStep;
-      backwardEvent.command += AddBackwardStep;
-      rightEvent.command +=    AddRightwardStep;
-      leftEvent.command +=     AddLeftwardStep;
-      whileEvent.command +=    StartWhile;
-      ifEvent.command +=       StartIf;
-      loopEvent.command +=     StartLoop;
-   }
-
-   void OnDisable() {
-      forwardEvent.command -=  AddForwardStep;
-      backwardEvent.command -= AddBackwardStep;
-      rightEvent.command -=    AddRightwardStep;
-      leftEvent.command -=     AddLeftwardStep;
-      whileEvent.command -=    StartWhile;
-      ifEvent.command -=       StartIf;
-      loopEvent.command -=     StartLoop;
-   }
+//   void OnEnable() {
+//      forwardEvent.command +=  AddForwardStep;
+//      backwardEvent.command += AddBackwardStep;
+//      rightEvent.command +=    AddRightwardStep;
+//      leftEvent.command +=     AddLeftwardStep;
+//      whileEvent.command +=    StartWhile;
+//      ifEvent.command +=       StartIf;
+//      loopEvent.command +=     StartLoop;
+//   }
+//
+//   void OnDisable() {
+//      forwardEvent.command -=  AddForwardStep;
+//      backwardEvent.command -= AddBackwardStep;
+//      rightEvent.command -=    AddRightwardStep;
+//      leftEvent.command -=     AddLeftwardStep;
+//      whileEvent.command -=    StartWhile;
+//      ifEvent.command -=       StartIf;
+//      loopEvent.command -=     StartLoop;
+//   }
 
    // Use this for initialization
    void Start () {
@@ -110,7 +110,7 @@ public class ScriptedPlayerController : DynamicPlayerController
 }
    ";
 
-      winLoseMessage.text = "";
+      //winLoseMessage.text = "";
       run = false;
       scriptRepresentation = "";
       horizontalSensorDetectable = LayerMask.GetMask ("HorizontalSensorDetectable");
@@ -127,11 +127,11 @@ public class ScriptedPlayerController : DynamicPlayerController
       frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, wallSensorRange, horizontalSensorDetectable);
 
       Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
-      if (frontSensorDetected) {
-         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
-      } else {
-         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
-      }
+//      if (frontSensorDetected) {
+//         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
+//      } else {
+//         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
+//      }
 
       rearSensor.origin = transform.position;
       rearSensor.direction = -transform.forward;

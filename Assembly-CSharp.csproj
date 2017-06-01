@@ -56,7 +56,11 @@
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\DoorController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\BackwardEvent.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\CanvasLayoutManager.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\ColliderLayoutManager.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\DragController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\ForwardEvent.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\HeadController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\IfEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\LeftEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\LevelLoader.cs" />
@@ -67,7 +71,6 @@
      <Compile Include="Assets\Scripts\GroundTextureTiling.cs" />
      <Compile Include="Assets\Scripts\KeyController.cs" />
      <Compile Include="Assets\Scripts\KeyRotator.cs" />
-     <Compile Include="Assets\Scripts\LevelScreenSizeController.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
      <Compile Include="Assets\Scripts\RuntimeCompiler.cs" />
      <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-Basic.shader" />

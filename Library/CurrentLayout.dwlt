@@ -20,7 +20,7 @@ MonoBehaviour:
   m_ShowMode: 4
   m_Title: 
   m_RootView: {fileID: 2}
-  m_MinSize: {x: 950, y: 300}
+  m_MinSize: {x: 950, y: 521}
   m_MaxSize: {x: 10000, y: 10000}
 --- !u!114 &2
 MonoBehaviour:
@@ -107,10 +107,10 @@ MonoBehaviour:
     y: 30
     width: 1920
     height: 947
-  m_MinSize: {x: 713, y: 492}
-  m_MaxSize: {x: 18008, y: 14042}
+  m_MinSize: {x: 711, y: 471}
+  m_MaxSize: {x: 18006, y: 14021}
   vertical: 0
-  controlID: 102
+  controlID: 9
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -131,10 +131,10 @@ MonoBehaviour:
     y: 0
     width: 368
     height: 947
-  m_MinSize: {x: 232, y: 492}
-  m_MaxSize: {x: 10002, y: 14042}
+  m_MinSize: {x: 232, y: 471}
+  m_MaxSize: {x: 10002, y: 14021}
   vertical: 1
-  controlID: 22
+  controlID: 42
 --- !u!114 &7
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -230,8 +230,8 @@ MonoBehaviour:
     y: 0
     width: 416
     height: 947
-  m_MinSize: {x: 277, y: 71}
-  m_MaxSize: {x: 4002, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 16}
   m_Panes:
   - {fileID: 16}
@@ -341,9 +341,9 @@ MonoBehaviour:
     height: 466
   m_TreeViewState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 
-    m_LastClickedID: 0
-    m_ExpandedIDs: 5a7dfeffe07dfeff9e7efeff9083feff3e88feffd48cfeffd291feff2096feff909afeff9a9afeff94a0feff1aa1feffd8a1feffcaa6feff78abfeff0eb0feff0cb5feff5ab9feffcabdfeffd4bdfeffe6bffeff60c1feffe8c1feffc4c3feffbcc8feffc2c8feff58cdfeff56d2feffa4d6feff14dbfeff1edbfeffe6e1feff7ce6feff7aebfeffc8effeff38f4feff42f4feff6c02fffff402ffffb203ffffa408ffff520dffffe811ffffe616ffff341bffffa41fffffae1fffffce2cffff542dffff122effff0433ffffb237ffff483cffff4641ffff9445ffff044affff0e4affff1c5cfffff45cffffb25dffffa462ffff5267ffffe86bffffe670ffff3475ffffa479ffffae79ffffc87bffff507cfffffe81ffffb086ffff4a8bffff4c90ffff9e94ffff1299ffff2099ffff1e9dffffa49dffff4ea3fffffca7ffff92acffff90b1ffffdeb5ffff4ebaffff58baffffcafbffffccfbffffcefbffffd0fbffffd2fbffffd4fbffffd8fbffff00000000402700009a710000d292000066ae0000ceb000009cec0000feee000094f000000e070100
+    m_SelectedIDs: 522cfeff
+    m_LastClickedID: -119726
+    m_ExpandedIDs: 94ebffffd8fbffff00000000a0260000a8260000c2260000d6260000e426000042270000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -362,7 +362,6 @@ MonoBehaviour:
       m_ClientGUIView: {fileID: 7}
     m_SearchString: 
   m_ExpandedScenes:
-  - Level4
   - Level6
   m_CurrenRootInstanceID: 0
   m_Locked: 0
@@ -404,19 +403,19 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/_Scenes
+    - Assets/Prefabs/GUI
   m_ViewMode: 1
   m_StartGridSize: 16
   m_LastFolders:
-  - Assets/_Scenes
+  - Assets/Prefabs/GUI
   m_LastFoldersGridSize: 16
   m_LastProjectPath: C:\Users\Public\Documents\Unity Projects\Scripted Cube
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 78250000
-    m_LastClickedID: 9592
-    m_ExpandedIDs: 00000000ea240000ee240000f024000072250000b6250000d42500002e2f0000302f0000322f0000342f0000362f0000382f00003a2f00003c2f0000ffffff7f
+    m_SelectedIDs: 2e2e0000
+    m_LastClickedID: 11822
+    m_ExpandedIDs: 00000000f6240000fa240000fc24000088250000d2250000f02500000e28000010280000122800001428000016280000182800001a2800001c280000ffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -444,7 +443,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000ea240000ee240000f024000072250000b6250000d42500002e2f0000302f0000322f0000342f0000362f0000382f00003a2f00003c2f0000
+    m_ExpandedIDs: 00000000f6240000fa240000fc24000088250000d2250000f02500000e28000010280000122800001428000016280000182800001a2800001c280000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -475,15 +474,15 @@ MonoBehaviour:
     m_ExpandedInstanceIDs: 00000000a28effff9e250000602400006c24000066240000b0250000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: LevelScreenSizeController
-      m_OriginalName: LevelScreenSizeController
+      m_Name: GUI
+      m_OriginalName: GUI
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 12130
+      m_UserData: 11822
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
       m_OriginalEventType: 0
@@ -526,14 +525,14 @@ MonoBehaviour:
     width: 1132
     height: 926
   m_SceneLighting: 1
-  lastFramingTime: 18546.656461188344
+  lastFramingTime: 34657.44996346059
   m_2DMode: 1
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 566, y: 454.5, z: 0}
+    m_Target: {x: 589.95197, y: 351.54602, z: 0}
     speed: 2
-    m_Value: {x: 566, y: 454.5, z: 0}
+    m_Value: {x: 589.95197, y: 351.54602, z: 0}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -560,9 +559,9 @@ MonoBehaviour:
     speed: 2
     m_Value: {x: 0, y: 0, z: 0, w: 1}
   m_Size:
-    m_Target: 869.8872
+    m_Target: 1038.647
     speed: 2
-    m_Value: 869.8872
+    m_Value: 1038.647
   m_Ortho:
     m_Target: 1
     speed: 2
