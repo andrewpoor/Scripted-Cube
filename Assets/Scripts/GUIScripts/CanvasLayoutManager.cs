@@ -9,19 +9,36 @@ public class CanvasLayoutManager : MonoBehaviour {
    public RawImage levelPane;
    public Image scriptPane;
    public Image commandsPane;
+   public Image scrollBar;
+   public Image runPane;
 
-   //Scale of the level pane.
+   //Scale of certain elements.
    public float levelX;
    public float levelY;
+   public float scriptPaneY;
 
    public float borderWidth;
 
    void Start () {
       Vector2 canvasSize = GetComponent<RectTransform> ().sizeDelta;
 
-      levelPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * levelX, canvasSize.y * levelY);
-      scriptPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * (1.0f - levelX) - 5.0f * borderWidth, canvasSize.y - 2.0f * borderWidth);
-      scriptPane.GetComponent<RectTransform> ().anchoredPosition += new Vector2 (borderWidth, 0.0f);
-      commandsPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * levelX, canvasSize.y * (1.0f - levelY) - borderWidth);
+      levelPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * levelX - borderWidth, canvasSize.y * levelY - borderWidth);
+      levelPane.GetComponent<RectTransform> ().anchoredPosition += new Vector2 (-borderWidth, -borderWidth);
+
+      scriptPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * (1.0f - levelX) - 10.0f * borderWidth, canvasSize.y * scriptPaneY - 2.0f * borderWidth);
+      scriptPane.GetComponent<RectTransform> ().anchoredPosition += new Vector2 (borderWidth, -borderWidth);
+
+      commandsPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * levelX - borderWidth, canvasSize.y * (1.0f - levelY) - 2.0f * borderWidth);
+      commandsPane.GetComponent<RectTransform> ().anchoredPosition += new Vector2 (-borderWidth, borderWidth);
+
+      scrollBar.GetComponent<RectTransform> ().sizeDelta = new Vector2 (
+         canvasSize.x - levelPane.GetComponent<RectTransform> ().sizeDelta.x - scriptPane.GetComponent<RectTransform> ().sizeDelta.x - 4.0f * borderWidth, 
+         canvasSize.y * scriptPaneY - 2.0f * borderWidth);
+      scrollBar.GetComponent<RectTransform> ().anchoredPosition = new Vector2 (scriptPane.GetComponent<RectTransform> ().sizeDelta.x + 2.0f * borderWidth, -borderWidth);
+
+      runPane.GetComponent<RectTransform> ().sizeDelta = new Vector2(
+         scriptPane.GetComponent<RectTransform> ().sizeDelta.x + scrollBar.GetComponent<RectTransform> ().sizeDelta.x + borderWidth,
+         canvasSize.y * (1.0f - scriptPaneY) - borderWidth);
+      runPane.GetComponent<RectTransform> ().anchoredPosition += new Vector2 (borderWidth, borderWidth);
    }
 }
