@@ -95,11 +95,10 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public IEnumerator CustomScript(PlayerController parent) {
-   float timer = 0f;
+   float timer = 0.0f;
+   float totalTime = 0.0f;
    int distance = 0;
    int rotations = 0;
-   float tileTime = " + tileTime + @"f;
-   float spinTime = " + spinTime + @"f;
    Vector3 startPosition;
    Vector3 targetPosition;
    Quaternion startRotation;
@@ -115,7 +114,7 @@ public class ScriptedPlayerController : DynamicPlayerController
 }
    ";
 
-      //winLoseMessage.text = "";
+      winLoseMessage.text = "";
       run = false;
       scriptRepresentation = "";
       horizontalSensorDetectable = LayerMask.GetMask ("HorizontalSensorDetectable");
@@ -140,7 +139,7 @@ public class ScriptedPlayerController : DynamicPlayerController
 //         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
 //      }
 
-      rearSensor.origin = transform.position;
+      rearSensor.origin = transform.position - 0.3f * transform.forward.normalized;
       rearSensor.direction = -transform.forward;
       rearSensorDetected = Physics.Raycast (rearSensor, out rearSensorHit, wallSensorRange, horizontalSensorDetectable);
 
@@ -186,114 +185,6 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    //The following functions are controlled by the UI elements to modify and run the custom script.
-
-   public void AddForwardStep(int duration)
-   {
-      scriptBody += @"
-      distance = Math.Min (" + duration + @", (int) Mathf.Round(parent.frontSensorHit.distance));
-      ";
-
-      scriptBody += @"
-      timer = tileTime * distance;
-      startPosition = parent.transform.position;
-      targetPosition = startPosition + parent.transform.forward.normalized * distance;
-
-      while(timer > 0f) {
-         timer -= Time.deltaTime;
-         parent.transform.position = Vector3.Lerp(startPosition, targetPosition, (tileTime * distance - Math.Max(timer, 0)) / (tileTime * distance));
-         
-         yielded = true;
-         yield return null;
-      }
-      ";
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Move " + duration.ToString() + " squares forwards.";
-   }
-
-   public void AddBackwardStep(int duration)
-   {
-      scriptBody += @"
-      distance = Math.Min (" + duration + @", (int) Mathf.Round(parent.rearSensorHit.distance));
-      ";
-
-      scriptBody += @"
-      timer = tileTime * distance;
-      startPosition = parent.transform.position;
-      targetPosition = startPosition - parent.transform.forward.normalized * distance;
-
-      while(timer > 0f) {
-         timer -= Time.deltaTime;
-         parent.transform.position = Vector3.Lerp(startPosition, targetPosition, (tileTime * distance - Math.Max(timer, 0)) / (tileTime * distance));
-         
-         yielded = true;
-         yield return null;
-      }
-      ";
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Move " + duration.ToString() + " squares backwards.";
-   }
-
-   public void AddRightwardStep(int duration)
-   {
-      scriptBody += @"
-      rotations = " + duration + @";
-      ";
-
-      scriptBody += @"
-      timer = spinTime * rotations;
-      startRotation = parent.transform.rotation;
-      targetRotation = startRotation * Quaternion.Euler(Vector3.up * 90 * rotations);
-      
-      while(timer > 0f) {
-         timer -= Time.deltaTime;
-         parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
-         
-         yielded = true;
-         yield return null;
-      }
-      ";
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Turn right " + (duration * 90).ToString() + " degrees.";
-   }
-
-   public void AddLeftwardStep(float duration)
-   {
-      scriptBody += @"
-      rotations = " + duration + @";
-      ";
-
-      scriptBody += @"
-      timer = spinTime * rotations;
-      startRotation = parent.transform.rotation;
-      targetRotation = startRotation * Quaternion.Euler(Vector3.up * -90 * rotations);
-      
-      while(timer > 0f) {
-         timer -= Time.deltaTime;
-         parent.transform.rotation = Quaternion.Lerp(startRotation, targetRotation, (spinTime * rotations - Math.Max(timer, 0)) / (spinTime * rotations));
-         
-         yielded = true;
-         yield return null;
-      }
-      ";
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Turn left " + (duration * 90).ToString() + " degrees.";
-   }
 
    public void StartWhile(string sensorType, string op, string value) {
       string negation = "!";
@@ -437,6 +328,8 @@ public class ScriptedPlayerController : DynamicPlayerController
    //Compile and run the script generated by the user
    public void RunScript()
    {
+      winLoseMessage.text = "";
+
       if (scriptCoroutine != null) {
          StopCoroutine (scriptCoroutine);
          transform.position = startingPosition;

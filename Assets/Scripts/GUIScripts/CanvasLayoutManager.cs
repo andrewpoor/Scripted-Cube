@@ -16,6 +16,7 @@ public class CanvasLayoutManager : MonoBehaviour {
    public float levelX;
    public float levelY;
    public float scriptPaneY;
+   public float tabsX;
 
    public float borderWidth;
 
@@ -30,6 +31,10 @@ public class CanvasLayoutManager : MonoBehaviour {
 
       commandsPane.GetComponent<RectTransform> ().sizeDelta = new Vector2 (canvasSize.x * levelX - borderWidth, canvasSize.y * (1.0f - levelY) - 2.0f * borderWidth);
       commandsPane.GetComponent<RectTransform> ().anchoredPosition += new Vector2 (-borderWidth, borderWidth);
+      commandsPane.GetComponent<CommandsPaneDetails> ().commandsHolder.GetComponent<RectTransform> ().sizeDelta = 
+         new Vector2 (commandsPane.GetComponent<RectTransform> ().sizeDelta.x * (1.0f - tabsX), commandsPane.GetComponent<RectTransform> ().sizeDelta.y);
+      commandsPane.GetComponent<CommandsPaneDetails> ().tabsHolder.GetComponent<RectTransform> ().sizeDelta = 
+         new Vector2 (commandsPane.GetComponent<RectTransform> ().sizeDelta.x * tabsX, commandsPane.GetComponent<RectTransform> ().sizeDelta.y);
 
       scrollBar.GetComponent<RectTransform> ().sizeDelta = new Vector2 (
          canvasSize.x - levelPane.GetComponent<RectTransform> ().sizeDelta.x - scriptPane.GetComponent<RectTransform> ().sizeDelta.x - 4.0f * borderWidth, 

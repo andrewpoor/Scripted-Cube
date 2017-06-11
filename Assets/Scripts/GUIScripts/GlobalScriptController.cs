@@ -19,6 +19,8 @@ public class GlobalScriptController : MonoBehaviour {
    private string scriptBody;
    private string scriptFooter;
 
+   private string loopIndexIdentifier = ""; //Dynamically updates to create new identifiers.
+
    public void Start() {
       bodyPieces = new List<GameObject> ();
       commands = new List<GameObject> ();
@@ -38,7 +40,8 @@ public class ScriptedPlayerController : DynamicPlayerController
    }
 
    public IEnumerator CustomScript(PlayerController parent) {
-   float timer = 0f;
+   float timer = 0.0f;
+   float totalTime = 0.0f;
    int distance = 0;
    int rotations = 0;
    float tileTime = " + tileTime + @"f;
@@ -67,7 +70,7 @@ public class ScriptedPlayerController : DynamicPlayerController
       commands.Insert (previousScriptPosition - 1, newCommand);
 
       newCommand.GetComponent<CommandDetails> ().scriptPosition = previousScriptPosition + 1;
-      newCommand.GetComponent<CommandDetails> ().commandIndentation = 8.0f;
+      newCommand.GetComponent<CommandDetails> ().commandIndentation += 8.0f;
       newCommand.transform.SetParent(transform, false);
 
       UpdatePositions ();
@@ -83,6 +86,13 @@ public class ScriptedPlayerController : DynamicPlayerController
       oldCommand.GetComponent<CommandDetails> ().commandIndentation = 0.0f;
       oldCommand.transform.SetParent(commandsPane.transform, true);
 
+      UpdatePositions ();
+      UpdateScriptUI ();
+   }
+
+   //Called by children when the state of the command has changed. For instance, when a new command is added to a 'block' command.
+   //Only the visuals need
+   public void UpdateCommand(GameObject command) {
       UpdatePositions ();
       UpdateScriptUI ();
    }
@@ -119,8 +129,8 @@ public class ScriptedPlayerController : DynamicPlayerController
       //Add indentation indicators.
       for(int i = 2; i < blocks; i++) {
          //Create new indicator.
-         GameObject bodyPiece = Instantiate(bodyPiecePrefab, transform.position, transform.rotation).gameObject;
-         bodyPiece.transform.SetParent (transform, true);
+         GameObject bodyPiece = Instantiate(bodyPiecePrefab, Vector3.zero, transform.rotation).gameObject;
+         bodyPiece.transform.SetParent (transform, false);
          bodyPieces.Add (bodyPiece);
 
          //Position indicator.
@@ -139,5 +149,10 @@ public class ScriptedPlayerController : DynamicPlayerController
       }
 
       return scriptHeader + scriptBody + scriptFooter;
+   }
+
+   public string NewLoopIdentifier() {
+      loopIndexIdentifier += "i";
+      return loopIndexIdentifier;
    }
 }
