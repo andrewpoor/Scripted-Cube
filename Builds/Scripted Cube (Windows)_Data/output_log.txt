@@ -19,20 +19,316 @@ Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds
 Loading C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
 Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\mcs.dll (this message is harmless)
 Loading C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\mcs.dll into Unity Child Domain
-- Completed reload, in  0.154 seconds
+- Completed reload, in  0.138 seconds
 Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 1.060249 ms
+UnloadTime: 1.092008 ms
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 253c -> priority: 1 
-  Thread -> id: 1ab0 -> priority: 1 
+  Thread -> id: f2c -> priority: 1 
+  Thread -> id: 152c -> priority: 1 
 Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 4.463953 ms
+UnloadTime: 4.529076 ms
 
-Unloading 5 unused Assets to reduce memory usage. Loaded Objects now: 1768.
-Total: 1.186644 ms (FindLiveObjects: 0.127999 ms CreateObjectMapping: 0.058065 ms MarkObjects: 0.990635 ms  DeleteObjects: 0.009303 ms)
+Unloading 5 unused Assets to reduce memory usage. Loaded Objects now: 2136.
+Total: 1.253371 ms (FindLiveObjects: 0.102656 ms CreateObjectMapping: 0.044270 ms MarkObjects: 1.095858 ms  DeleteObjects: 0.009303 ms)
+
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 2.239194 ms
+
+Unloading 509 unused Assets to reduce memory usage. Loaded Objects now: 367.
+Total: 0.513282 ms (FindLiveObjects: 0.093032 ms CreateObjectMapping: 0.042666 ms MarkObjects: 0.181573 ms  DeleteObjects: 0.195368 ms)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.407738 ms
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 2269.
+Total: 1.225782 ms (FindLiveObjects: 0.104581 ms CreateObjectMapping: 0.043949 ms MarkObjects: 1.066985 ms  DeleteObjects: 0.009303 ms)
+
+
+using UnityEngine;
+using System.Collections;
+using System;
+
+public class ScriptedPlayerController : DynamicPlayerController
+{
+   public IEnumerator GetCoroutine(PlayerController parent) {
+      return CustomScript(parent);
+   }
+
+   public IEnumerator CustomScript(PlayerController parent) {
+   float timer = 0.0f;
+   float totalTime = 0.0f;
+   int distance = 0;
+   int rotations = 0;
+   int actionID = 0;
+   float tileTime = 1f;
+   float spinTime = 1f;
+   Vector3 startPosition;
+   Vector3 targetPosition;
+   Quaternion startRotation;
+   Quaternion targetRotation;
+   bool yielded;
+   
+         for(int i = 0; i < 3; i++) {
+            yielded = false;
+         
+      distance = Math.Min (8, (int) Mathf.Round(parent.frontSensorHit.distance));
+      actionID = 0;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition + parent.transform.forward.normalized * distance;
+      timer = 0.0f;
+      totalTime = distance;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.position != targetPosition) {
+         timer += Time.deltaTime / parent.tileTime;
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition,  1 - (totalTime - timer) / totalTime);
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+      rotations = 1;
+      actionID = 1;
+      startRotation = parent.transform.rotation;
+      targetRotation = startRotation * Quaternion.Euler(Vector3.up * 90 * rotations);
+      timer = 0.0f;
+      totalTime = rotations;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.rotation != targetRotation) {
+         timer += Time.deltaTime / parent.spinTime;
+         parent.transform.rotation = startRotation * Quaternion.Euler(Vector3.up * Mathf.Lerp(0.0f, 90 * rotations, 1 - (totalTime - timer) / totalTime));
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+      distance = Math.Min (8, (int) Mathf.Round(parent.frontSensorHit.distance));
+      actionID = 2;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition + parent.transform.forward.normalized * distance;
+      timer = 0.0f;
+      totalTime = distance;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.position != targetPosition) {
+         timer += Time.deltaTime / parent.tileTime;
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition,  1 - (totalTime - timer) / totalTime);
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+            if(!yielded) {
+               yield return null;
+            }
+         }
+         
+   yield return null;
+   }
+}
+   
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\System.Xml.dll (this message is harmless)
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\Mono.Security.dll (this message is harmless)
+Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\System.Configuration.dll (this message is harmless)
+Running
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+
+using UnityEngine;
+using System.Collections;
+using System;
+
+public class ScriptedPlayerController : DynamicPlayerController
+{
+   public IEnumerator GetCoroutine(PlayerController parent) {
+      return CustomScript(parent);
+   }
+
+   public IEnumerator CustomScript(PlayerController parent) {
+   float timer = 0.0f;
+   float totalTime = 0.0f;
+   int distance = 0;
+   int rotations = 0;
+   int actionID = 0;
+   float tileTime = 1f;
+   float spinTime = 1f;
+   Vector3 startPosition;
+   Vector3 targetPosition;
+   Quaternion startRotation;
+   Quaternion targetRotation;
+   bool yielded;
+   
+         for(int i = 0; i < 3; i++) {
+            yielded = false;
+         
+      distance = Math.Min (8, (int) Mathf.Round(parent.frontSensorHit.distance));
+      actionID = 0;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition + parent.transform.forward.normalized * distance;
+      timer = 0.0f;
+      totalTime = distance;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.position != targetPosition) {
+         timer += Time.deltaTime / parent.tileTime;
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition,  1 - (totalTime - timer) / totalTime);
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+      rotations = 1;
+      actionID = 1;
+      startRotation = parent.transform.rotation;
+      targetRotation = startRotation * Quaternion.Euler(Vector3.up * 90 * rotations);
+      timer = 0.0f;
+      totalTime = rotations;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.rotation != targetRotation) {
+         timer += Time.deltaTime / parent.spinTime;
+         parent.transform.rotation = startRotation * Quaternion.Euler(Vector3.up * Mathf.Lerp(0.0f, 90 * rotations, 1 - (totalTime - timer) / totalTime));
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+      distance = Math.Min (8, (int) Mathf.Round(parent.rearSensorHit.distance));
+      actionID = 2;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition - parent.transform.forward.normalized * distance;
+      timer = 0.0f;
+      totalTime = distance;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.position != targetPosition) {
+         timer += Time.deltaTime / parent.tileTime;
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition,  1 - (totalTime - timer) / totalTime);
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+            if(!yielded) {
+               yield return null;
+            }
+         }
+         
+   yield return null;
+   }
+}
+   
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Running
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 2.031636 ms
+
+Unloading 533 unused Assets to reduce memory usage. Loaded Objects now: 367.
+Total: 8.294003 ms (FindLiveObjects: 0.042666 ms CreateObjectMapping: 0.029834 ms MarkObjects: 8.007206 ms  DeleteObjects: 0.213974 ms)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.500129 ms
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 2230.
+Total: 9.908276 ms (FindLiveObjects: 0.104581 ms CreateObjectMapping: 0.046195 ms MarkObjects: 9.746271 ms  DeleteObjects: 0.010586 ms)
+
+Unloading 2 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 1.817019 ms
+
+Unloading 517 unused Assets to reduce memory usage. Loaded Objects now: 367.
+Total: 8.706874 ms (FindLiveObjects: 0.089824 ms CreateObjectMapping: 0.084370 ms MarkObjects: 8.336669 ms  DeleteObjects: 0.195688 ms)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.329142 ms
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 2137.
+Total: 9.553149 ms (FindLiveObjects: 0.110034 ms CreateObjectMapping: 0.058385 ms MarkObjects: 9.369971 ms  DeleteObjects: 0.014436 ms)
+
+
+using UnityEngine;
+using System.Collections;
+using System;
+
+public class ScriptedPlayerController : DynamicPlayerController
+{
+   public IEnumerator GetCoroutine(PlayerController parent) {
+      return CustomScript(parent);
+   }
+
+   public IEnumerator CustomScript(PlayerController parent) {
+   float timer = 0.0f;
+   float totalTime = 0.0f;
+   int distance = 0;
+   int rotations = 0;
+   int actionID = 0;
+   float tileTime = 1f;
+   float spinTime = 1f;
+   Vector3 startPosition;
+   Vector3 targetPosition;
+   Quaternion startRotation;
+   Quaternion targetRotation;
+   bool yielded;
+   
+      distance = Math.Min (8, (int) Mathf.Round(parent.frontSensorHit.distance));
+      actionID = 0;
+      startPosition = parent.transform.position;
+      targetPosition = startPosition + parent.transform.forward.normalized * distance;
+      timer = 0.0f;
+      totalTime = distance;
+
+      parent.LightUpAction(actionID);
+
+      while(parent.transform.position != targetPosition) {
+         timer += Time.deltaTime / parent.tileTime;
+         parent.transform.position = Vector3.Lerp(startPosition, targetPosition,  1 - (totalTime - timer) / totalTime);
+         
+         yielded = true;
+         yield return null;
+      }
+
+      parent.UnlightAction(actionID);
+      
+   yield return null;
+   }
+}
+   
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Running
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
 

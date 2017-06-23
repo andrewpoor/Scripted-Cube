@@ -56,11 +56,14 @@
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\DoorController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\CanvasLayoutManager.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\ColliderLayoutManager.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\BasicColliderController.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\Command\BasicCommandColliderLayout.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\BasicCommandScriptController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\BlockColliderController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\CommandDetails.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\CommandDragController.cs" />
+     <Compile Include="Assets\Scripts\GUIScripts\Command\CommandScriptController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\CommandSpawner.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\ConditionColliderController.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\Command\ConditionDragController.cs" />
@@ -88,13 +91,6 @@
      <Compile Include="Assets\Scripts\GUIScripts\ScriptCodes\IConditionScriptCode.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\ScriptCodes\LeftCommandScriptCode.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\ScriptCodes\RightCommandScriptCode.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\BackwardEvent.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\ForwardEvent.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\IfEvent.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\LeftEvent.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\LoopEvent.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\RightEvent.cs" />
-     <Compile Include="Assets\Scripts\GUIScripts\TEMP\WhileEvent.cs" />
      <Compile Include="Assets\Scripts\GUIScripts\TabSelector.cs" />
      <Compile Include="Assets\Scripts\GroundTextureTiling.cs" />
      <Compile Include="Assets\Scripts\IResettable.cs" />
@@ -102,11 +98,7 @@
      <Compile Include="Assets\Scripts\KeyRotator.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />
      <Compile Include="Assets\Scripts\RuntimeCompiler.cs" />
-     <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-Basic.shader" />
-     <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-BasicOutline.shader" />
      <None Include="Assets\playerScript.txt" />
-     <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-LightedOutline.shader" />
-     <None Include="Assets\Standard Assets\Toon Shading\Sources\Shaders\Toony-Lighted.shader" />
  <Reference Include="UnityEngine.UI">
  <HintPath>C:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using UnityEditor;
 
 //The dynamically loaded scripts must inherit from this, to provide a public API.
 public interface DynamicPlayerController {
