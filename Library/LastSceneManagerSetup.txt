@@ -1,4 +1,19 @@
 sceneSetups:
-- path: Assets/_Scenes/Level6.unity
+- path: Assets/_Scenes/Level1.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/_Scenes/Level2.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/_Scenes/Level3.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/_Scenes/Level4.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/_Scenes/Level5.unity
+  isLoaded: 0
+  isActive: 0
+- path: Assets/_Scenes/DemoLevel.unity
   isLoaded: 1
   isActive: 1

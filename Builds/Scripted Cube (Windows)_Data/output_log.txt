@@ -19,20 +19,20 @@ Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds
 Loading C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
 Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\mcs.dll (this message is harmless)
 Loading C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\mcs.dll into Unity Child Domain
-- Completed reload, in  0.165 seconds
+- Completed reload, in  0.154 seconds
 Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\System.Core.dll (this message is harmless)
 Platform assembly: C:\Users\Public\Documents\Unity Projects\Scripted Cube\Builds\Scripted Cube (Windows)_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 1920x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-UnloadTime: 1.055758 ms
+UnloadTime: 1.060249 ms
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 2868 -> priority: 1 
-  Thread -> id: 144 -> priority: 1 
+  Thread -> id: 253c -> priority: 1 
+  Thread -> id: 1ab0 -> priority: 1 
 Unloading 6 Unused Serialized files (Serialized files now loaded: 0)
-UnloadTime: 4.215015 ms
+UnloadTime: 4.463953 ms
 
-Unloading 5 unused Assets to reduce memory usage. Loaded Objects now: 842.
-Total: 0.497242 ms (FindLiveObjects: 0.034967 ms CreateObjectMapping: 0.023418 ms MarkObjects: 0.428270 ms  DeleteObjects: 0.010265 ms)
+Unloading 5 unused Assets to reduce memory usage. Loaded Objects now: 1768.
+Total: 1.186644 ms (FindLiveObjects: 0.127999 ms CreateObjectMapping: 0.058065 ms MarkObjects: 0.990635 ms  DeleteObjects: 0.009303 ms)
 

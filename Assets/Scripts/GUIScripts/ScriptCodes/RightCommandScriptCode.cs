@@ -8,15 +8,21 @@ public class RightCommandScriptCode : CommandScriptCode {
    public InputField turnsInput;
 
    public override string GetCode() {
+      GlobalScriptController globalScriptController = GetComponent<CommandDragController> ().commandSpawner.globalScriptController;
+      int actionID = globalScriptController.RegisterAction (gameObject);
+
       int numTurns;
 
       if(int.TryParse (turnsInput.text, out numTurns)) {
          return @"
       rotations = " + numTurns + @";
+      actionID = " + actionID + @";
       startRotation = parent.transform.rotation;
       targetRotation = startRotation * Quaternion.Euler(Vector3.up * 90 * rotations);
       timer = 0.0f;
       totalTime = rotations;
+
+      parent.LightUpAction(actionID);
 
       while(parent.transform.rotation != targetRotation) {
          timer += Time.deltaTime / parent.spinTime;
@@ -25,6 +31,8 @@ public class RightCommandScriptCode : CommandScriptCode {
          yielded = true;
          yield return null;
       }
+
+      parent.UnlightAction(actionID);
       ";
       } else {
          //Error?

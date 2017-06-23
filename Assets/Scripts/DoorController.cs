@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DoorController : MonoBehaviour {
+public class DoorController : MonoBehaviour, IResettable {
 
    public float timeToDisappear = 1.0f; //Time taken to fade away when collected.
 
@@ -33,5 +33,18 @@ public class DoorController : MonoBehaviour {
    //Unlocks the door to allow the player through.
    public void Unlock() {
       disappear = true;
+   }
+
+   public void ResetToStart() {
+      disappear = false;
+      timer = 0.0f;
+
+      foreach(MeshRenderer meshRenderer in meshRenderers) {
+         Color color = meshRenderer.material.color;
+         color.a = 1.0f;
+         meshRenderer.material.color = color;
+      }
+
+      gameObject.SetActive (true);
    }
 }

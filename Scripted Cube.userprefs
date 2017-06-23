@@ -1,14 +1,11 @@
 ﻿<Properties StartupItem="Assembly-CSharp.csproj">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\PlayerController.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\GUIScripts\Command\IfScriptController.cs">
     <Files>
-      <File FileName="Assets\Scripts\PlayerController.cs" Line="233" Column="1" />
-      <File FileName="Assets\Scripts\GUIScripts\GlobalScriptController.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GUIScripts\LoopScriptController.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GUIScripts\CommandSpawner.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GUIScripts\Command\CommandScriptController.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\GUIScripts\Command\CommandDetails.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\RuntimeCompiler.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\PlayerController.cs" Line="122" Column="8" />
+      <File FileName="Assets\Scripts\GUIScripts\Command\IfElseScriptController.cs" Line="125" Column="8" />
+      <File FileName="Assets\Scripts\GUIScripts\Command\WhileScriptController.cs" Line="120" Column="8" />
+      <File FileName="Assets\Scripts\GUIScripts\Command\IfScriptController.cs" Line="120" Column="8" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

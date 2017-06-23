@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class KeyController : MonoBehaviour {
+public class KeyController : MonoBehaviour, IResettable {
 
    public float timeToDisappear = 1.0f; //Time taken to fade away when collected.
    public float scalingRate = 1.0f; //Rate the object grows, additive to the current scale per second.
@@ -12,6 +12,8 @@ public class KeyController : MonoBehaviour {
    private Vector3 scaling;
    private float timer = 0;
    private bool disappear = false; //If true, begin the disappearing sequence.
+
+   private Vector3 initialScale;
 
    void Start () {
       string colourTag = transform.Find ("KeyIdentifier").gameObject.tag;
@@ -26,6 +28,7 @@ public class KeyController : MonoBehaviour {
 
       meshRenderer = GetComponent<MeshRenderer> ();
       scaling = new Vector3 (scalingRate, scalingRate, scalingRate);
+      initialScale = transform.localScale;
    }
 
    void Update () {
@@ -52,5 +55,17 @@ public class KeyController : MonoBehaviour {
             door.BroadcastMessage ("Unlock");
          }
       }
+   }
+
+   public void ResetToStart() {
+      disappear = false;
+      transform.localScale = initialScale;
+      timer = 0.0f;
+
+      Color color = meshRenderer.material.color;
+      color.a = 1.0f;
+      meshRenderer.material.color = color;
+
+      gameObject.SetActive (true);
    }
 }

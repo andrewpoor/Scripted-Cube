@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEditor;
 
 //The dynamically loaded scripts must inherit from this, to provide a public API.
 public interface DynamicPlayerController {
@@ -14,15 +15,6 @@ public interface DynamicPlayerController {
 
 public class PlayerController : MonoBehaviour {
    public Text winLoseMessage;
-   public Text scriptPreview;
-
-   public ForwardEvent forwardEvent;
-   public BackwardEvent backwardEvent;
-   public RightEvent rightEvent;
-   public LeftEvent leftEvent;
-   public WhileEvent whileEvent;
-   public IfEvent ifEvent;
-   public LoopEvent loopEvent;
 
    public float wallSensorRange = 100f;
    public float groundSensorRange = 1f;
@@ -32,18 +24,16 @@ public class PlayerController : MonoBehaviour {
    public bool rearSensorDetected; //True if the rear sensor has detected something.
    public RaycastHit groundSensorHit; //Details ground sensor detects.
    public bool groundSensorDetected; //True if the ground sensor has detected something.
-   public float tileTime = 1.0f; //Time taken for the player to move one tile.
-   public float spinTime = 1.0f; //Time taken for the player to rotate 90 degrees.
+   public float tileTime = 1.0f; //Time taken to move one tile.
+   public float spinTime = 1.0f; //Time taken to turn 90 degrees.
 
    public GlobalScriptController scriptController;
+   public Transform level;
 
    private bool run; //If true, run the custom script.
-   private string scriptRepresentation; //A visual representation of the script written so far.
-   private int indentationLevel = 0; //Indentation level of the script representation.
-   private string loopIndexName = ""; //Allows for new loop indexes to be created in the dynamic code by extending the previous one.
-
    private Vector3 startingPosition;
    private Quaternion startingRotation;
+   private List<GameObject> actions; //Ordered list of all actions. Used to light up the currently running command.
 
    private Ray frontSensor = new Ray(); //Detects walls and other objects ahead of player.
    private Ray rearSensor = new Ray(); //Detects walls and other objects behind the player.
@@ -56,67 +46,10 @@ public class PlayerController : MonoBehaviour {
    private string scriptPath;
    private IEnumerator scriptCoroutine;
 
-   //Boilerplate code for assembling the user's script.
-   private string scriptHeader;
-   private string scriptBody;
-   private string scriptFooter;
-
-//   void OnEnable() {
-//      forwardEvent.command +=  AddForwardStep;
-//      backwardEvent.command += AddBackwardStep;
-//      rightEvent.command +=    AddRightwardStep;
-//      leftEvent.command +=     AddLeftwardStep;
-//      whileEvent.command +=    StartWhile;
-//      ifEvent.command +=       StartIf;
-//      loopEvent.command +=     StartLoop;
-//   }
-//
-//   void OnDisable() {
-//      forwardEvent.command -=  AddForwardStep;
-//      backwardEvent.command -= AddBackwardStep;
-//      rightEvent.command -=    AddRightwardStep;
-//      leftEvent.command -=     AddLeftwardStep;
-//      whileEvent.command -=    StartWhile;
-//      ifEvent.command -=       StartIf;
-//      loopEvent.command -=     StartLoop;
-//   }
-
    // Use this for initialization
    void Start () {
-      scriptHeader = @"
-using UnityEngine;
-using System.Collections;
-using System;
-
-public class ScriptedPlayerController : DynamicPlayerController
-{
-   public IEnumerator GetCoroutine(PlayerController parent) {
-      return CustomScript(parent);
-   }
-
-   public IEnumerator CustomScript(PlayerController parent) {
-   float timer = 0.0f;
-   float totalTime = 0.0f;
-   int distance = 0;
-   int rotations = 0;
-   Vector3 startPosition;
-   Vector3 targetPosition;
-   Quaternion startRotation;
-   Quaternion targetRotation;
-   bool yielded;
-   ";
-
-      scriptBody = "";
-
-      scriptFooter = @"
-   yield return null;
-   }
-}
-   ";
-
       winLoseMessage.text = "";
       run = false;
-      scriptRepresentation = "";
       horizontalSensorDetectable = LayerMask.GetMask ("HorizontalSensorDetectable");
       groundSensorDetectable = LayerMask.GetMask ("GroundSensorDetectable");
       frontSensorDetected = false;
@@ -124,6 +57,7 @@ public class ScriptedPlayerController : DynamicPlayerController
       groundSensorDetected = false;
       startingPosition = transform.position;
       startingRotation = transform.rotation;
+      actions = new List<GameObject> ();
    }
 
    // Update is called once per frame
@@ -132,13 +66,6 @@ public class ScriptedPlayerController : DynamicPlayerController
       frontSensor.direction = transform.forward;
       frontSensorDetected = Physics.Raycast (frontSensor, out frontSensorHit, wallSensorRange, horizontalSensorDetectable);
 
-      Debug.DrawRay (frontSensor.origin, frontSensor.direction * wallSensorRange, Color.red);
-//      if (frontSensorDetected) {
-//         scriptPreview.text = "Hit: " + frontSensorHit.distance + "m.\nScript: " + scriptRepresentation;
-//      } else {
-//         scriptPreview.text = "Nope.\nScript: " + scriptRepresentation;
-//      }
-
       rearSensor.origin = transform.position - 0.3f * transform.forward.normalized;
       rearSensor.direction = -transform.forward;
       rearSensorDetected = Physics.Raycast (rearSensor, out rearSensorHit, wallSensorRange, horizontalSensorDetectable);
@@ -146,8 +73,6 @@ public class ScriptedPlayerController : DynamicPlayerController
       groundSensor.origin = transform.position;
       groundSensor.direction = Vector3.down;
       groundSensorDetected = Physics.Raycast (groundSensor, out groundSensorHit, groundSensorRange, groundSensorDetectable);
-
-      //scriptPreview.text = "Script: " + scriptRepresentation;
    }
 
    // FixedUpdate is called once per frame, before physics calculations
@@ -184,159 +109,17 @@ public class ScriptedPlayerController : DynamicPlayerController
       }
    }
 
-   //The following functions are controlled by the UI elements to modify and run the custom script.
-
-   public void StartWhile(string sensorType, string op, string value) {
-      string negation = "!";
-      if (op == "=") {
-         op = "==";
-         negation = "";
-      }
-
-      if(sensorType == "Front Sensor Distance") {
-         scriptBody += @"
-         while(Mathf.Round(parent.frontSensorHit.distance) " + op + " " + value + @") {
-            yielded = false;
-         ";
-      } else if(sensorType == "Front Sensor Colour") {
-         scriptBody += @"
-         while(" + negation + @"parent.frontSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
-            yielded = false;
-         ";
-      } else if(sensorType == "Ground Sensor Colour") {
-         scriptBody += @"
-         while(" + negation + @"parent.groundSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
-            yielded = false;
-         ";
-      } else {
-         indentationLevel -= 1;
-      }
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      indentationLevel += 1;
-
-      if(sensorType == "Front Sensor Distance") {
-         scriptRepresentation += "While(FrontSensorDistance " + op + " " + value + ") {";
-      } else if(sensorType == "Front Sensor Colour") {
-         scriptRepresentation += "While(FrontColour is " + (op == "!=" ? "not " : "") + value + ") {";
-      } else if(sensorType == "Ground Sensor Colour") {
-         scriptRepresentation += "While(GroundColour is " + (op == "!=" ? "not " : "") + value + ") {";
-      } else {
-         scriptRepresentation += "Unknown sensor type used.";
-      }
-   }
-
-   public void EndBlock() {
-      scriptBody += @"
-         if(!yielded) {
-            yield return null;
-         }
-      }
-      ";
-
-      indentationLevel = Math.Max(0, indentationLevel - 1);
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "}";
-   }
-
-   public void StartIf(string sensorType, string op, string value) {
-      string negation = "!";
-      if (op == "=") {
-         op = "==";
-         negation = "";
-      }
-
-      if(sensorType == "Front Sensor Distance") {
-         scriptBody += @"
-         if(Mathf.Round(parent.frontSensorHit.distance) " + op + " " + value + @") {
-            yielded = false;
-         ";
-      } else if(sensorType == "Front Sensor Colour") {
-         scriptBody += @"
-         if(" + negation + @"parent.frontSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
-            yielded = false;
-         ";
-      } else if(sensorType == "Ground Sensor Colour") {
-         scriptBody += @"
-         if(" + negation + @"parent.groundSensorHit.collider.gameObject.CompareTag(""Colour" + value + @""")) {
-            yielded = false;
-         ";
-      } else {
-         indentationLevel -= 1;
-      }
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      indentationLevel += 1;
-
-      if(sensorType == "Front Sensor Distance") {
-         scriptRepresentation += "If(FrontSensorDistance " + op + " " + value + ") {";
-      } else if(sensorType == "Front Sensor Colour") {
-         scriptRepresentation += "If(FrontColour is " + (op == "!=" ? "not " : "") + value + ") {";
-      } else if(sensorType == "Ground Sensor Colour") {
-         scriptRepresentation += "If(GroundColour is " + (op == "!=" ? "not " : "") + value + ") {";
-      } else {
-         scriptRepresentation += "Unknown sensor type used.";
-      }
-   }
-
-   public void StartElse() {
-      scriptBody += @"
-      } else {
-         yielded = false;
-      ";
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel - 1; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "} else {";
-   }
-
-   public void StartLoop(int numLoops) {
-      loopIndexName += "i";
-
-      scriptBody += @"
-      for(int " + loopIndexName + @" = 0; " + loopIndexName + @" < " + numLoops + @"; " + loopIndexName + @"++) {
-         yielded = false;
-      ";
-
-      scriptRepresentation += "\n";
-      for(int i = 0; i < indentationLevel; i++) {
-         scriptRepresentation += "   ";
-      }
-      scriptRepresentation += "Loop " + numLoops + " times {";
-
-      indentationLevel += 1;
-   }
-    
-   //Reset all of the game's components
-   public void ResetScript()
-   {
-      SceneManager.LoadScene (SceneManager.GetActiveScene ().buildIndex);
-   }
-
    //Compile and run the script generated by the user
    public void RunScript()
    {
-      winLoseMessage.text = "";
+      string script = scriptController.CollateScript ();
 
-      if (scriptCoroutine != null) {
-         StopCoroutine (scriptCoroutine);
-         transform.position = startingPosition;
-         transform.rotation = startingRotation;
+      Debug.Log (script);
+
+      //Ensure no actions are lit up.
+      for (int i = 0; i < actions.Count; i++) {
+         UnlightAction (i);
       }
-
-      string script = scriptController.collateScript ();
 
       //Compile the script and extract its coroutine, which contains the actions for the player to perform.
       movementAssembly = RuntimeCompiler.Compile(script);
@@ -344,5 +127,45 @@ public class ScriptedPlayerController : DynamicPlayerController
       scriptCoroutine = dpc.GetCoroutine (this);
 
       run = true;
+   }
+
+   //Stop the currently running script and reset the stage and player.
+   public void ResetScript() {
+      //Stop the script from running.
+      if (scriptCoroutine != null) {
+         StopCoroutine (scriptCoroutine);
+      }
+
+      winLoseMessage.text = "";
+      transform.position = startingPosition;
+      transform.rotation = startingRotation;
+
+      //Reset the level.
+      foreach(Transform child in level) {
+         IResettable resettableObject = child.gameObject.GetComponent<IResettable> ();
+
+         if (resettableObject != null) {
+            resettableObject.ResetToStart ();
+         }
+      }
+
+      run = false;
+   }
+
+   public void SetActions(List<GameObject> actionsList) {
+      actions = actionsList;
+   }
+
+   public void LightUpAction(int commandID) {
+      actions [commandID].GetComponent<IScriptController> ().LightUp ();
+   }
+
+   public void UnlightAction(int commandID) {
+      actions [commandID].GetComponent<IScriptController> ().Unlight ();
+   }
+
+   public void SetSpeed(float speed) {
+      tileTime = speed;
+      spinTime = speed;
    }
 }

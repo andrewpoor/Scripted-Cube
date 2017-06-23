@@ -12,16 +12,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class CommandDragController : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler {
-   public CommandScriptController commandScriptController; //Refernce to the script controller for this command.
    public CommandSpawner commandSpawner; //Creates new commands when this one is moved.
    public Canvas canvas; //Regerence to the main canvas.
+   public Image commandsPane; //Starting parent for commands.
 
-   //Positioning of command.
-   private RectTransform rTransform; //Positioning of the command.
-   private Vector2 pointerOffset; //Offset of the mouse when dragging.
-   private Vector2 canvasScale; //To account for different resolutions.
-
-   private BoxCollider2D boxCollider;
+   private IScriptController scriptController; //Refernce to the script controller for this command.
    private bool inScript = false; //Flag for position of the command. It's either in the holder or the script.
    private bool newCommand = true; //Flag for deciding whether a new command needs to be spawned or not.
 
@@ -29,24 +24,19 @@ public class CommandDragController : MonoBehaviour, IBeginDragHandler, IDragHand
    private List<GameObject> touchingCommands;
 
    public void Start() {
-      rTransform = GetComponent<RectTransform> ();
       touchingCommands = new List<GameObject> ();
-
-      boxCollider = GetComponent<BoxCollider2D> ();
-      boxCollider.enabled = false;
-
-      canvasScale = new Vector2 (canvas.GetComponent<CanvasScaler>().referenceResolution.x / Screen.width, canvas.GetComponent<CanvasScaler>().referenceResolution.y / Screen.height);
+      scriptController = GetComponent<IScriptController> ();
    }
 
    public void OnBeginDrag(PointerEventData eventData) {
-      boxCollider.enabled = true;
+      GetComponentInChildren<IColliderController> ().EnableCollider (true);
+      GetComponentInChildren<IColliderController> ().ShrinkCollider ();
+      commandSpawner.transform.SetAsLastSibling (); //Bring to front.
+      touchingCommands = new List<GameObject> ();
 
       if(inScript) {
-         commandScriptController.RemoveFromScript ();
+         scriptController.RemoveFromScript ();
       }
-
-      pointerOffset = rTransform.anchoredPosition - eventData.position;
-      //pointerOffset = Vector2.Scale (pointerOffset, canvasScale);
    }
 
    public void OnDrag(PointerEventData eventData) {
@@ -68,23 +58,24 @@ public class CommandDragController : MonoBehaviour, IBeginDragHandler, IDragHand
          }
 
          inScript = true;
+         scriptController.InsertIntoScript (touchingCommands);
 
-         commandScriptController.InsertIntoScript (touchingCommands);
+         GetComponentInChildren<IColliderController> ().ExpandCollider ();
 
          //Reset list.
          touchingCommands = new List<GameObject> ();
       } else {
-         boxCollider.enabled = false; //Prevent the command from intefering with the newly-spawned one.
+         GetComponentInChildren<IColliderController> ().EnableCollider(false); //Prevent the command from intefering with the newly-spawned one.
          commandSpawner.SpawnNewCommand (); //Spawn a new command back at the spawner.
          Destroy (gameObject); //Delete this command.
       }
    }
 
-   public void OnTriggerEnter2D(Collider2D collider) {
-      touchingCommands.Add (collider.gameObject);
+   public void HandleTriggerEnter(Collider2D collider) {
+      touchingCommands.Add (collider.gameObject.transform.parent.gameObject);
    }
   
-   public void OnTriggerExit2D(Collider2D collider) {
-      touchingCommands.Remove (collider.gameObject);
+   public void HandleTriggerExit(Collider2D collider) {
+      touchingCommands.Remove (collider.gameObject.transform.parent.gameObject);
    }
 }
